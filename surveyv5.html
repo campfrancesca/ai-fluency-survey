@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AI Fluency Survey · Health Care Services</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0f1117; font-family: 'Inter', sans-serif; min-height: 100vh; }
+  input[type=range] { -webkit-appearance: none; appearance: none; height: 6px; border-radius: 99px; outline: none; border: none; cursor: pointer; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #4ade80; cursor: pointer; }
+  input[type=text], textarea { font-family: 'Inter', sans-serif; }
+  a { text-decoration: none; }
+  ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: #374151; border-radius: 99px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+
+const { useState } = React;
+
+// ─── CATALOGUE ────────────────────────────────────────────────────────────────
+const CATALOGUE = [
+  { id:"ai_cookbook",          title:"AI Cookbook — Overview of BCG AI Tools",                      duration:"4m",durationMin:4,    type:"Video",       url:"https://bcgcloud\.sharepoint\.com/sites/BIATribe/_layouts/15/stream\.aspx\?id=%2Fsites%2FBIATribe%2FShared%20Documents%2F08%20BIA%20Squads%2FAI%20For%20BI%26A%2FVideo%20Content%2FAI%20Cookbook%2Emp4", tags:["foundations","tools","beginner"], topRated:true },
+  { id:"what_is_genai",        title:"What is Generative AI (GenAI)?",                              duration:"1m",durationMin:1,    type:"Infographic", url:"https://lab\.edcast\.com/insights/what\-is\-generative\-ai\-genai\-genai", tags:["foundations","beginner"] },
+  { id:"what_is_llm",          title:"What is a Large Language Model (LLM)?",                       duration:"2m",durationMin:2,    type:"Infographic", url:"https://lab\.edcast\.com/insights/what\-is\-a\-large\-language\-model\-llm\-at", tags:["foundations","llm","beginner"] },
+  { id:"genai_skills_bcg",     title:"The GenAI skills you need to thrive at BCG",                  duration:"15m",durationMin:15,   type:"Course",      url:"https://lab\.edcast\.com/insights/the\-genai\-skills\-you\-need\-to\-thrive\-at\-bcg\-card\-454c05e6\-6a40\-4660\-869c\-f54608c307f5", tags:["foundations","beginner"] },
+  { id:"prompting_game",       title:"Skill Lab | Prompting Best Practices Game",                   duration:"10m",durationMin:10,   type:"Game",        url:"https://lab\.edcast\.com/insights/skill\-lab\-try\-prompting\-best\-practices", tags:["foundations","prompting","beginner"] },
+  { id:"chatgpt_eval_game",    title:"Skill Lab | ChatGPT Output Evaluation Game",                  duration:"10m",durationMin:10,   type:"Game",        url:"https://lab\.edcast\.com/insights/skill\-lab\-output\-evaluation\-game", tags:["foundations","prompting","beginner"] },
+  { id:"responsible_ai",hasDeck:true,       title:"Responsible AI in Practice",                                  duration:"1h31m",durationMin:91, type:"Journey",     url:"https://lab\.edcast\.com/journey/responsible\-ai\-in\-practice\-for\-ct\-and\-bst", tags:["responsible","security"] },
+  { id:"responsible_hi_vig",hasDeck:true,   title:"Responsible AI – High Vigilance Areas",                       duration:"1h2m",durationMin:62,  type:"Pathway",     url:"https://lab\.edcast\.com/pathways/responsible\-ai\-in\-action", tags:["responsible","security"] },
+  { id:"teaming_collab",hasDeck:true,       title:"Teaming, Transformed: Optimizing Collaboration with GenAI",   duration:"1h15m",durationMin:75, type:"Pathway",     url:"https://lab\.edcast\.com/pathways/teaming\-transformed\-optimizing\-collaboration\-with\-genai\-this", tags:["collaboration","team","productivity"], topRated:true },
+  { id:"chatgpt_access",       title:"ChatGPT Enterprise: How to Access & Use It",                  duration:"5m",durationMin:5,    type:"Slides",      url:"https://lab\.edcast\.com/insights/chatgpt\-enterprise\-how\-to\-access\-and\-use\-it", tags:["setup","chatgpt"] },
+  { id:"deckster_access",      title:"Deckster: How to Access & Use It",                            duration:"5m",durationMin:5,    type:"Slides",      url:"https://lab\.edcast\.com/insights/deckster\-how\-to\-access\-and\-use\-it", tags:["setup","deckster"] },
+  { id:"navi_access",          title:"Navi: How to Access & Use It",                                duration:"5m",durationMin:5,    type:"Slides",      url:"https://lab\.edcast\.com/insights/navi\-how\-to\-access\-use\-it", tags:["setup","navi"] },
+  { id:"whats_available",      title:"What's available for you to use?",                            duration:"5m",durationMin:5,    type:"Infographic", url:"https://lab\.edcast\.com/insights/what\-s\-available\-for\-you\-to\-use\-explore", tags:["setup","tools","beginner"] },
+  { id:"chatgpt_guide",        title:"ChatGPT Enterprise: User Guide",                              duration:"10m",durationMin:10,   type:"Slides",      url:"https://lab\.edcast\.com/insights/redirecting\-card\-99d1e42b\-1de2\-4811\-9a88\-0eca6f4a5113", tags:["chatgpt","tools"] },
+  { id:"deckster_guide",       title:"Deckster: User Guide",                                        duration:"10m",durationMin:10,   type:"Slides",      url:"https://lab\.edcast\.com/insights/deckster\-user\-guide", tags:["deckster","tools"] },
+  { id:"navi_guide",           title:"Navi: User Guide",                                            duration:"10m",durationMin:10,   type:"Slides",      url:"https://lab\.edcast\.com/insights/navi\-user\-guide\-card\-9bc1fa99\-44c5\-4d80\-8d8f\-13e8a3362abc", tags:["navi","tools","research"] },
+  { id:"zoom_guide",           title:"Zoom AI Companion Questions Overview",                        duration:"15m",durationMin:15,   type:"Text",        url:"https://lab\.edcast\.com/insights/zoom\-ai\-companion\-questions\-overview", tags:["zoom","tools","meetings"], topRated:true },
+  { id:"claude_overview",      title:"Claude: Overview & Use cases",                                duration:"2m",durationMin:2,    type:"Infographic", url:"https://lab\.edcast\.com/insights/claude\-overview\-use\-cases", tags:["claude","tools"] },
+  { id:"chatgpt_deep_dive",hasDeck:true,hasDeck:true,    title:"AI Masterclass: ChatGPT Deep Dive",                           duration:"1h20m",durationMin:80, type:"Pathway",     url:"https://lab\.edcast\.com/pathways/ai\-masterclass\-chatgpt\-deep\-dive", tags:["chatgpt","prompting","intermediate"] },
+  { id:"optimizing_outputs",hasDeck:true,   title:"Optimizing GenAI Outputs",                                    duration:"1h10m",durationMin:70, type:"Pathway",     url:"https://lab\.edcast\.com/pathways/optimizing\-genai\-outputs\-this", tags:["chatgpt","prompting","intermediate"], topRated:true },
+  { id:"custom_gpts",hasDeck:true,          title:"Building Custom GPTs: Solve Your Specific Problems",          duration:"55m",durationMin:55,   type:"Webinar",     url:"https://lab\.edcast\.com/insights/building\-custom\-gpts\-leverage\-chatgpt\-to\-solve\-your\-specifi\-card\-5b910c89\-2cfc\-4eba\-8e7e\-6eb4f92dc875", tags:["chatgpt","custom_gpt","intermediate"], topRated:true },
+  { id:"ai_tool_mashup",hasDeck:true,       title:"AI Tool Mashup: Smart Combos in Action",                      duration:"1h",durationMin:60,    type:"Pathway",     url:"https://lab\.edcast\.com/pathways/ai\-tool\-mashup\-smart\-combos\-in\-action", tags:["tools","productivity","intermediate"] },
+  { id:"choose_model",         title:"Choose the Correct ChatGPT Model for Your Task",              duration:"5m",durationMin:5,    type:"Infographic", url:"https://lab\.edcast\.com/insights/choosing\-the\-right\-ai\-model\-nbsp", tags:["chatgpt","prompting"] },
+  { id:"personalize_chatgpt",  title:"Personalize ChatGPT to Avoid Generic Answers",                duration:"5m",durationMin:5,    type:"Infographic", url:"https://lab\.edcast\.com/insights/your\-shortcut\-to\-better\-chatgpt\-output", tags:["chatgpt","prompting"] },
+  { id:"provide_context",      title:"Provide Context to Your ChatGPT to Receive Better Answers",   duration:"2m",durationMin:2,    type:"Video",       url:"https://lab\.edcast\.com/insights/how\-to\-receive\-better\-answers\-from\-chatgpt", tags:["chatgpt","prompting"] },
+  { id:"quick_tips_chatgpt",   title:"Quick Tips and Hacks to Work Faster with ChatGPT",            duration:"5m",durationMin:5,    type:"Infographic", url:"https://lab\.edcast\.com/insights/quick\-tips\-and\-hacks\-to\-work\-faster\-with\-chatgpt", tags:["chatgpt","prompting","productivity"] },
+  { id:"shared_projects",      title:"Quick Start | Using Shared Projects in ChatGPT",              duration:"5m",durationMin:5,    type:"Infographic", url:"https://lab\.edcast\.com/insights/quick\-start\-using\-shared\-projects\-in\-chatgpt", tags:["chatgpt","collaboration","team"], topRated:true },
+  { id:"digital_assistant",    title:"Quick Start | Build your Digital Assistant in ChatGPT",       duration:"5m",durationMin:5,    type:"Infographic", url:"https://lab\.edcast\.com/insights/quick\-start\-build\-your\-digital\-assistant\-in\-chatgpt\-in", tags:["chatgpt","productivity","team"], topRated:true },
+  { id:"slides_to_points",     title:"Turn Slides into Talking Points / Use it for Translations",   duration:"5m",durationMin:5,    type:"Text",        url:"https://lab\.edcast\.com/insights/create\-talking\-points\-for\-meetings", tags:["chatgpt","productivity","slides"] },
+  { id:"challenge_assumptions",title:"Use it to Challenge Your Assumptions & Find Blind Spots",     duration:"6m",durationMin:6,    type:"Infographic", url:"https://lab\.edcast\.com/insights/think\-like\-your\-competitor\-with\-gpt", tags:["chatgpt","thinking","proposals"] },
+  { id:"analyze_data",         title:"Analyze Data with ChatGPT",                                   duration:"15m",durationMin:15,   type:"Video",       url:"https://lab\.edcast\.com/insights/data\-analytics\-with\-chatgpt", tags:["chatgpt","data","analysis"] },
+  { id:"voice_mode",           title:"Use Voice Mode to Stay Productive Between Meetings",          duration:"5m",durationMin:5,    type:"Infographic", url:"https://lab\.edcast\.com/insights/use\-voice\-mode\-to\-stay\-productive\-between\-meetings", tags:["chatgpt","productivity","meetings"] },
+  { id:"storytelling_pres",hasDeck:true,    title:"Smarter Storytelling & Presentation Building with GenAI",     duration:"38m",durationMin:38,   type:"Pathway",     url:"https://lab\.edcast\.com/pathways/smarter\-storytelling\-presentation\-building\-with\-genai", tags:["slides","productivity","storytelling"], topRated:true },
+  { id:"outlook_gpt",hasDeck:true,          title:"AI-Powered Outlook: GPT-5 Update & Smarter Ways to Work",    duration:"37m",durationMin:37,   type:"Pathway",     url:"https://lab\.edcast\.com/pathways/al\-powered\-outlook\-gpt\-update\-smarter\-ways\-to\-work", tags:["email","outlook","productivity"] },
+  { id:"excel_chatgpt",hasDeck:true,        title:"Boost Your Excel Skills with ChatGPT",                        duration:"1h10m",durationMin:70, type:"Pathway",     url:"https://lab\.edcast\.com/pathways/boost\-your\-excel\-skills\-with\-chatgpt", tags:["data","excel","productivity"], topRated:true },
+  { id:"sharepoint_ai",hasDeck:true,        title:"SharePoint Connector: Search, Summarize & Integrate Knowledge",duration:"1h10m",durationMin:70,type:"Pathway",     url:"https://lab\.edcast\.com/pathways/al\-sharepoint\-search\-summarize\-integrate\-knowledge", tags:["sharepoint","research","knowledge"] },
+  { id:"data_python",          title:"Power Up Your Data Analysis with GenAI and Python",           duration:"1h30m",durationMin:90, type:"Pathway",     url:"https://lab\.edcast\.com/pathways/power\-up\-your\-data\-analysis\-with\-genai\-and\-python", tags:["automation","data","advanced"], topRated:true },
+  { id:"apis_python",          title:"APIs in Action: Unlocking New Use Cases with Python & OpenAI",duration:"1h12m",durationMin:72, type:"Pathway",     url:"https://lab\.edcast\.com/pathways/unlocking\-new\-use\-cases\-with\-python\-openai", tags:["automation","api","advanced"] },
+  { id:"automating_work",hasDeck:true,      title:"Automating Your Work",                                        duration:"1h4m",durationMin:64,  type:"Pathway",     url:"https://lab\.edcast\.com/pathways/automating\-your\-work\-what", tags:["automation","productivity"], topRated:true },
+  { id:"automate_save_time",   title:"Automate work with AI to save time",                          duration:"2m",durationMin:2,    type:"Video",       url:"https://lab\.edcast\.com/insights/automate\-work\-with\-ai\-to\-save\-time", tags:["automation","beginner"] },
+  { id:"automating_recording",hasDeck:true, title:"Automating Your Work — Masterclass Recording",                duration:"52m",durationMin:52,   type:"Course",      url:"https://lab\.edcast\.com/pathways/automating\-your\-work\-what/cards/19290263", tags:["automation","intermediate"], topRated:true },
+  { id:"when_to_use_agents",   title:"When to use and not to use agents",                           duration:"4m",durationMin:4,    type:"Video",       url:"https://lab\.edcast\.com/insights/when\-to\-use\-and\-not\-to\-use\-agents", tags:["automation","agents","beginner"] },
+  { id:"map_workflow",         title:"Map your workflow",                                           duration:"2m",durationMin:2,    type:"Video",       url:"https://lab\.edcast\.com/insights/map\-your\-workflow", tags:["automation","beginner"] },
+  { id:"n8n_no_code",hasDeck:true,          title:"Automate Your Work with n8n (No Code Required)",              duration:"49m",durationMin:49,   type:"Course",      url:"https://lab\.edcast\.com/insights/automate\-your\-work\-with\-nn\-no\-code\-required", tags:["automation","n8n","intermediate"] },
+  { id:"n8n_advanced",         title:"Build AI Agents and Automate Workflows with n8n",             duration:"50m",durationMin:50,   type:"Course",      url:"https://lab\.edcast\.com/insights/build\-ai\-agents\-and\-automate\-workflows\-with\-nn", tags:["automation","n8n","agents","advanced"] },
+  { id:"custom_gpts_automate", title:"Automating Your Work with Custom GPTs (No Code Required)",    duration:"31m",durationMin:31,   type:"Course",      url:"https://lab\.edcast\.com/insights/automating\-your\-work\-with\-custom\-gpts\-no\-code\-required", tags:["automation","custom_gpt","intermediate"] },
+  { id:"power_automate",       title:"Microsoft Power Automate Essential Training",                 duration:"2h1m",durationMin:121,  type:"Course",      url:"https://lab\.edcast\.com/insights/microsoft\-power\-automate\-essential\-training", tags:["automation","microsoft","intermediate"] },
+  { id:"data_protection",      title:"Data Protection Guidance for Personal Data Processing",       duration:"5m",durationMin:5,    type:"Course",      url:"https://lab\.edcast\.com/pathways/ECL\-90203a06\-86cc\-400f\-89f3\-e1295f7b20b6", tags:["responsible","security"], topRated:true },
+  { id:"claude_quickstart",    title:"Quick Start Guide: Claude",                                   duration:"2m",durationMin:2,    type:"Slides",      url:"https://lab\.edcast\.com/insights/quick\-start\-guide\-claude", tags:["claude","tools","beginner"] },
+  { id:"claude_user_guide",    title:"Claude User Guide",                                           duration:"20m",durationMin:20,   type:"Slides",      url:"https://lab\.edcast\.com/insights/claude\-user\-guide", tags:["claude","tools"] },
+  { id:"claude_101",           title:"Claude 101",                                                  duration:"20m",durationMin:20,   type:"Course",      url:"https://lab\.edcast\.com/insights/claude\-card\-e5ce2cc0\-52c2\-4ce5\-90b4\-680aa6bbee5f", tags:["claude","tools","beginner"] },
+  { id:"claude_enterprise",    title:"Claude Enterprise Playbook: Setup, Prompting, Usage",         duration:"20m",durationMin:20,   type:"Document",    url:"https://lab\.edcast\.com/insights/how\-to\-access\-claude\-enterprise", tags:["claude","tools","prompting"] },
+  { id:"claudecode_quickstart",title:"Quick Start Guide: Claude Code",                              duration:"2m",durationMin:2,    type:"Slides",      url:"https://lab\.edcast\.com/insights/quick\-start\-guide\-claude\-code\-claude", tags:["claudecode","tools","beginner"] },
+  { id:"claudecode_action",    title:"Claude Code in Action",                                       duration:"20m",durationMin:20,   type:"Course",      url:"https://lab\.edcast\.com/insights/claude\-code\-card\-6c4f1a01\-c8f7\-4524\-ba8c\-9a43a02b8537", tags:["claudecode","tools","advanced"] },
+  { id:"claudecode_playbook",  title:"Claude Code Technical Playbook",                              duration:"30m",durationMin:30,   type:"Article",     url:"https://lab\.edcast\.com/insights/how\-to\-access\-claude\-code", tags:["claudecode","tools","advanced"] },
+  { id:"openai_prompting",     title:"Prompt Engineering Guide — OpenAI",                           duration:"30m",durationMin:30,   type:"Free online", url:"https://platform\.openai\.com/docs/guides/prompt\-engineering", tags:["prompting","llm","foundations","external"] },
+  { id:"anthropic_prompting",  title:"Prompt Engineering Interactive Tutorial — Anthropic",         duration:"1h",durationMin:60,    type:"Free online", url:"https://docs\.anthropic\.com/en/docs/build\-with\-claude/prompt\-engineering/overview", tags:["prompting","llm","foundations","claude","external"] },
+];
+
+// ─── RECOMMENDATION ENGINE ────────────────────────────────────────────────────
+function getRecommendations(answers) {
+  const { overallScore, satisfactionScore, llmKnowledge, toolUsage, productivityUsecases, clientUsecases, topPriority, blockers, role } = answers;
+  const isBST = role==='BST';
+  const isCTM = role==='CTM';
+  const isCTL = role==='CTL';
+  const isMDP = role==='MDP';
+  const level      = (id) => toolUsage[id] || 0;
+  const unknown    = (id) => level(id) === 0;
+  const heardOnly  = (id) => level(id) === 1;
+  const frustrated = (id) => level(id) === 4;
+  const notExp     = (id) => !productivityUsecases[id] || productivityUsecases[id]===0;
+  const tried      = (id) => productivityUsecases[id]===1;
+  const interested = (id) => productivityUsecases[id]===2;
+  const notClient   = (id) => !clientUsecases[id] || clientUsecases[id]===0;
+  const intClient   = (id) => clientUsecases[id]===2;
+  const triedClient = (id) => clientUsecases[id]===1;
+  const notOrInt    = (id) => notClient(id)||intClient(id); // not tried OR interested
+  const fm=[],oh=[],th=[];
+
+  // ── ALWAYS: AI Cookbook as entry point ───────────────────────────────────────
+  if (overallScore <= 4) {
+    fm.push("ai_cookbook","what_is_genai","what_is_llm");
+    oh.push("genai_skills_bcg");
+  }
+
+  // ── SATISFACTION GAP: not happy with results → prompting deep-dives ─────────
+  if (satisfactionScore && satisfactionScore <= 4) {
+    fm.push("openai_prompting","provide_context","choose_model");
+    oh.push("anthropic_prompting","optimizing_outputs");
+    th.push("chatgpt_deep_dive");
+  }
+
+  // ── ROLE-BASED BOOSTS ────────────────────────────────────────────────────────
+  // MDP: short formats only, high-level tools, no automation/coding
+  if (isMDP) {
+    fm.push("ai_cookbook","voice_mode","whats_available");
+    oh.push("teaming_collab","storytelling_pres");
+    // deprioritise technical items — they'll be excluded by slice(0,3)
+  }
+  // CTL: focus on team productivity, shared projects, client deliverables
+  if (isCTL) {
+    fm.push("shared_projects","digital_assistant","voice_mode");
+    oh.push("teaming_collab","outlook_gpt","storytelling_pres");
+  }
+  // CTM: full range — prompting, tools, use cases, data analysis
+  if (isCTM) {
+    fm.push("voice_mode","quick_tips_chatgpt");
+    oh.push("ai_tool_mashup","analyze_data");
+  }
+  // BST: focus on day-to-day productivity, outlook, excel, automation
+  if (isBST) {
+    fm.push("voice_mode","quick_tips_chatgpt");
+    oh.push("outlook_gpt","excel_chatgpt","automating_work");
+  }
+
+  // ── LLM KNOWLEDGE GAP ─────────────────────────────────────────────────────
+  // For frustrated users or LLM beginners → external free resources are best
+  if (llmKnowledge <= 3 || frustrated("chatgpt") || frustrated("claude")) {
+    fm.push("openai_prompting");
+    oh.push("anthropic_prompting");
+  }
+  if (llmKnowledge <= 5) {
+    fm.push("choose_model","provide_context","quick_tips_chatgpt");
+    oh.push("ai_tool_mashup"); // intermediate - Canvas, Deep Research, connectors
+  }
+
+  // ── TOOL GAPS ─────────────────────────────────────────────────────────────
+  // ChatGPT: always useful basics for setup
+  if (unknown("chatgpt") || heardOnly("chatgpt")) {
+    fm.push("chatgpt_access","whats_available");
+    oh.push("chatgpt_guide"); // connectors section especially useful
+  }
+  if (frustrated("chatgpt")) {
+    fm.push("openai_prompting","provide_context");
+    oh.push("anthropic_prompting","ai_tool_mashup");
+  }
+
+  // Claude: only recommend if they have access (score > 0 implies they've heard of it in BCG context)
+  if (unknown("claude") || heardOnly("claude")) {
+    fm.push("claude_quickstart");
+    oh.push("claude_101");
+  } else if (frustrated("claude")) {
+    fm.push("openai_prompting");
+    oh.push("anthropic_prompting","claude_enterprise");
+  }
+
+  // Claude Code: only for advanced/technical profiles
+  if ((unknown("claudecode") || heardOnly("claudecode")) && overallScore >= 7) {
+    fm.push("claudecode_quickstart");
+    oh.push("claudecode_action");
+    th.push("claudecode_playbook");
+  } else if (frustrated("claudecode")) {
+    oh.push("claudecode_action");
+    th.push("claudecode_playbook");
+  }
+
+  // Navi
+  if (unknown("navi") || heardOnly("navi")) {
+    fm.push("navi_access");
+    oh.push("navi_guide");
+  } else if (frustrated("navi")) {
+    oh.push("navi_guide");
+  }
+
+  // Deckster
+  if (unknown("deckster") || heardOnly("deckster")) {
+    fm.push("deckster_access");
+    oh.push("deckster_guide");
+  } else if (frustrated("deckster")) {
+    oh.push("storytelling_pres"); // participant guide = 2min version
+  }
+
+  // Zoom: must-read for everyone
+  fm.push("voice_mode"); // must-read
+  if (unknown("zoom") || heardOnly("zoom") || frustrated("zoom")) {
+    oh.push("zoom_guide");
+  }
+
+  // Copilot / Outlook / SharePoint
+  if (unknown("copilot") || heardOnly("copilot")) {
+    oh.push("outlook_gpt"); // slides version = 5min
+    oh.push("sharepoint_ai");
+  } else if (frustrated("copilot")) {
+    oh.push("sharepoint_ai");
+    th.push("power_automate");
+  }
+
+  // n8n: very advanced, only for high scorers
+  if ((unknown("n8n") || heardOnly("n8n")) && overallScore >= 7) {
+    oh.push("n8n_no_code");
+    th.push("n8n_advanced");
+  } else if (frustrated("n8n") && overallScore >= 7) {
+    oh.push("automating_recording");
+    th.push("n8n_advanced","apis_python");
+  }
+
+  // ── PRODUCTIVITY USE CASE GAPS ─────────────────────────────────────────────
+  // Voice mode: always a must-read (already pushed above)
+  
+  // Shared Projects & Digital Assistant: good for case team leaders
+  if (notExp("artifacts") || notExp("digitaltwin")) {
+    fm.push("shared_projects","digital_assistant");
+    oh.push("teaming_collab"); // must-read for case team leaders
+  }
+
+  // Data analysis: must for PL/Principals (score >= 5), not MDPs
+  if ((notExp("agentic")||interested("agentic")) && overallScore >= 5 && overallScore <= 8) {
+    fm.push("analyze_data");
+    oh.push("excel_chatgpt");
+    th.push("data_python");
+  } else if ((notExp("agentic")||interested("agentic")) && overallScore >= 9) {
+    th.push("data_python","apis_python");
+  }
+
+  // Automation: only for advanced users
+  if (notExp("scheduled_tasks") && overallScore >= 6) {
+    fm.push("automate_save_time","when_to_use_agents");
+    oh.push("automating_work");
+    th.push("n8n_no_code");
+  }
+
+  // Company knowledge / Navi
+  if (notExp("company_knowledge")) {
+    fm.push("navi_access");
+    oh.push("navi_guide");
+  }
+
+  // Slides / Deckster
+  if (notExp("slides")) {
+    fm.push("deckster_access");
+    oh.push("storytelling_pres"); // participant guide is 2min
+  }
+
+  // Calendar / email management
+  if (notExp("calendar")) {
+    oh.push("outlook_gpt"); // slides = 5min
+  }
+
+  // Team collaboration
+  if (notExp("notes") || notExp("newsletter") || notExp("reviews") || notExp("feedback_drafter")) {
+    oh.push("teaming_collab");
+    fm.push("digital_assistant");
+  }
+
+  // ── CLIENT USE CASE GAPS ───────────────────────────────────────────────────
+  // ── CLIENT DELIVERABLES ───────────────────────────────────────────────────────
+  // Web apps / micro-tools → Claude Code or Lovable
+  if (notOrInt("webapps")) {
+    if (unknown("claudecode")||heardOnly("claudecode")) { fm.push("claudecode_quickstart"); oh.push("claudecode_action"); th.push("claudecode_playbook"); }
+    else { oh.push("claudecode_action"); th.push("claudecode_playbook","apis_python"); }
+  } else if (triedClient("webapps")) {
+    th.push("claudecode_playbook","apis_python");
+  }
+  // Podcast / audio → NotebookLM
+  if (notOrInt("podcast")) {
+    fm.push("whats_available");
+  }
+  // Dashboard → Excel + Python
+  if (notOrInt("dashboard")) {
+    oh.push("excel_chatgpt"); th.push("data_python");
+  } else if (triedClient("dashboard")) {
+    th.push("data_python","apis_python");
+  }
+  // Agent / chatbot → Custom GPTs first, then n8n
+  if (notOrInt("agent")) {
+    if (unknown("n8n")||heardOnly("n8n")) { oh.push("custom_gpts_automate"); th.push("n8n_advanced"); }
+    else if (frustrated("n8n"))           { th.push("n8n_advanced","apis_python"); }
+    else                                  { oh.push("custom_gpts_automate"); th.push("n8n_advanced"); }
+  } else if (triedClient("agent")) {
+    th.push("n8n_advanced","apis_python");
+  }
+  // Synthesis → Claude if unknown, else go deeper
+  if (notOrInt("synthesis")) {
+    if (unknown("claude")||heardOnly("claude")) { fm.push("claude_quickstart"); oh.push("claude_101"); }
+    else { oh.push("claude_user_guide"); th.push("claude_enterprise"); }
+  }
+
+  // ── DECLARED PRIORITY ──────────────────────────────────────────────────────
+  if (topPriority && topPriority.includes("prompting")) {
+    fm.push("provide_context","choose_model","quick_tips_chatgpt");
+    oh.push("openai_prompting","ai_tool_mashup");
+    th.push("anthropic_prompting","chatgpt_deep_dive");
+  }
+  if (topPriority && topPriority.includes("automating")) {
+    fm.push("automate_save_time","when_to_use_agents");
+    oh.push("automating_work","automating_recording");
+    th.push("n8n_no_code","n8n_advanced");
+  }
+  if (topPriority && topPriority.includes("Team productivity")) {
+    fm.push("shared_projects","voice_mode");
+    oh.push("teaming_collab");
+    th.push("ai_tool_mashup","custom_gpts");
+  }
+  if (topPriority && topPriority.includes("agentic")) {
+    fm.push("when_to_use_agents");
+    oh.push("automating_recording");
+    th.push("n8n_advanced","apis_python");
+  }
+  if (topPriority && topPriority.includes("Client deliverables")) {
+    fm.push("digital_assistant");
+    oh.push("storytelling_pres","custom_gpts");
+    th.push("data_python","n8n_advanced");
+  }
+
+  // ── BLOCKERS → targeted training types ───────────────────────────────────────
+  const hasBlocker = (b) => blockers && blockers.includes(b);
+
+  // "Not enough time" → short formats only, 5min picks, slide versions
+  if (hasBlocker("Limited time to explore new tools")) {
+    fm.push("ai_cookbook","voice_mode","data_protection");
+    // Override: clear oh/th to keep only fast items — signal via note in results
+  }
+
+  // "Don't know where to start" → navigation trainings first
+  if (hasBlocker("Unsure where or how to start")) {
+    fm.push("ai_cookbook","whats_available","bcg_gpt_store");
+    oh.push("genai_skills_bcg","chatgpt_access");
+    th.push("chatgpt_deep_dive");
+  }
+
+  // "Data security concerns" → responsible AI first
+  if (hasBlocker("Client data security & confidentiality concerns")) {
+    fm.push("data_protection");
+    oh.push("responsible_hi_vig");
+    th.push("responsible_ai");
+  }
+
+  // "Outputs not reliable" → prompting & evaluation trainings
+  if (hasBlocker("Output quality doesn't consistently meet my needs")) {
+    fm.push("openai_prompting","choose_model","provide_context");
+    oh.push("optimizing_outputs","anthropic_prompting");
+    th.push("chatgpt_deep_dive","chatgpt_eval_game");
+  }
+
+  // "Unclear which tool for which task" → tool discovery & mashup
+  if (hasBlocker("Unclear which tool is best suited for each task")) {
+    fm.push("whats_available","ai_cookbook");
+    oh.push("ai_tool_mashup","bcg_gpt_store");
+    th.push("chatgpt_deep_dive");
+  }
+
+  // "No leadership signal" → team & collaboration formats, easy wins to show
+  if (hasBlocker("Lack of organisational guidance or mandate")) {
+    fm.push("voice_mode","shared_projects");
+    oh.push("teaming_collab");
+    th.push("ai_tool_mashup");
+  }
+
+  // ── DEDUPLICATE, ENFORCE DURATION LIMITS & LIMIT TO 3 ──────────────────────
+  const resolve = (ids, maxMins) => {
+    const seen = new Set();
+    return ids
+      .filter(id=>{ if(seen.has(id)) return false; seen.add(id); return true; })
+      .map(id=>CATALOGUE.find(c=>c.id===id))
+      .filter(Boolean)
+      .filter(item => !maxMins || (item.durationMin||60) <= maxMins)
+      .slice(0,3);
+  };
+  return {
+    fiveMin:    resolve(fm, 15),   // max 15 min in 5-min bucket
+    oneHour:    resolve(oh, 70),   // max ~1h10 in 1-hour bucket
+    threeHours: resolve(th, null), // no limit for 3-hour bucket
+  };
+}
+
+// ─── DATA ─────────────────────────────────────────────────────────────────────
+const TOOLS = [
+  {id:"chatgpt",    label:"ChatGPT",              support:{type:"email", value:"chatgptl2support@bcg.com"},                         training:"optimizing_outputs"},
+  {id:"claude",     label:"Claude",               support:{type:"email", value:"ClaudeforEnterpriseL2Support@bcg.com"},             training:"claude_user_guide"},
+  {id:"gemini",     label:"Gemini",               support:null,                                                                     training:"ai_tool_mashup"},
+  {id:"copilot",    label:"Microsoft Copilot",    support:{type:"email", value:"chatgptl2support@bcg.com"},                         training:"sharepoint_ai"},
+  {id:"notebooklm", label:"NotebookLM",           support:null,                                                                     training:"whats_available"},
+  {id:"juniorai",   label:"Junior.ai",            support:{type:"email", value:"generativeai-internalproducts@bcg.com"},            training:"whats_available"},
+  {id:"n8n",        label:"n8n",                  support:{type:"slack", value:"#n8n-support"},                                     training:"automating_recording"},
+  {id:"claudecode", label:"Claude Code",          support:{type:"email", value:"ClaudeforEnterpriseL2Support@bcg.com"},             training:"claudecode_action"},
+  {id:"dust",       label:"Dust",                 support:{type:"email", value:"generativeai-internalproducts@bcg.com"},            training:"whats_available"},
+  {id:"translator", label:"AI Translator",        support:{type:"email", value:"generativeai-internalproducts@bcg.com"},            training:"whats_available"},
+  {id:"navi",       label:"Navi",                 support:{type:"email", value:"generativeai-internalproducts@bcg.com"},            training:"navi_guide"},
+  {id:"lovable",    label:"Lovable",              support:null,                                                                     training:"claudecode_quickstart"},
+  {id:"deckster",   label:"Deckster",             support:{type:"email", value:"generativeai-internalproducts@bcg.com"},            training:"deckster_guide"},
+  {id:"zoom",       label:"Zoom AI Transcription",support:null,                                                                     training:"zoom_guide"},
+  {id:"superhuman", label:"Superhuman",           support:null,                                                                     training:"voice_mode"},
+];
+const PRODUCTIVITY_GROUPS = [
+  {id:"proposal",label:"Win the work",color:"#4ade80",items:[
+    {id:"proposal_brainstorm",label:"Brainstorm proposal angles & structure with AI"},
+    {id:"pitch_prep",label:"Prepare & rehearse a pitch (AI roleplay)"},
+    {id:"deep_research",label:"Deep research — rapid industry or company insights"},
+    {id:"audience_questions",label:"Anticipate client questions before a key meeting"},
+  ]},
+  {id:"kickoff",label:"Run the case",color:"#22d3ee",items:[
+    {id:"company_knowledge",label:"Query internal firm knowledge instantly (e.g. Navi)"},
+    {id:"notes",label:"Synthesise meeting notes & action items"},
+    {id:"scheduled_tasks",label:"Automate recurring tasks & reminders"},
+    {id:"agentic",label:"Agentic analysis of large datasets"},
+  ]},
+  {id:"collab",label:"Collaborate & produce",color:"#818cf8",items:[
+    {id:"canvas",label:"Draft complex documents — emails, SoW, memos"},
+    {id:"slides",label:"Generate or iterate slides in seconds (Deckster…)"},
+    {id:"artifacts",label:"Claude Artifacts for live team collaboration"},
+    {id:"digitaltwin",label:"Digital twin to review documents (senior proxy)"},
+  ]},
+  {id:"team",label:"Enable your team",color:"#f472b6",items:[
+    {id:"reviews",label:"Write performance reviews & evaluations"},
+    {id:"newsletter",label:"Team or account newsletters"},
+    {id:"calendar",label:"Triage unanswered emails & manage calendar"},
+    {id:"feedback_drafter",label:"Draft downward feedback (e.g. using PRIME)"},
+  ]},
+];
+const CLIENT_USECASES = [
+  {id:"webapps",   label:"Interactive web app or micro-tool as a leave-behind (instead of a static deck)", tools:["Claude / Lovable / Claude Code"]},
+  {id:"podcast",   label:"AI-generated podcast or audio summary to present findings",                       tools:["NotebookLM"]},
+  {id:"dashboard", label:"Live scenario / sensitivity dashboard for client workshops",                      tools:["ChatGPT / Claude + Python"]},
+  {id:"agent",     label:"Custom AI agent or chatbot embedded in the client's workflow",                    tools:["n8n / Custom GPTs / Dust"]},
+  {id:"synthesis", label:"Automated synthesis of large document sets (interviews, reports, datasets)",      tools:["NotebookLM / Claude / ChatGPT"]},
+];
+const OVERALL_LABELS = ["","I have never used an AI tool","I've tried one or two tools, but rarely","I use AI occasionally for basic tasks","I use AI regularly for personal productivity","I integrate AI into most of my daily work","I explore new tools and prompting techniques","I experiment with advanced features & workflows","I build or customise AI tools for my team","I code regularly with LLMs or build automations","I design AI-powered systems and workflows at scale"];
+const LLM_LABELS     = ["","I have no understanding of how LLMs work","I know it generates text from prompts","I understand basic concepts (prompt, context, temperature)","I know about context windows, hallucinations, limitations","I understand RAG, embeddings, and system prompts","I can compare models and choose the right one for a task","I understand fine-tuning and model evaluation","I can design multi-step agentic workflows","I work with APIs, chains, and tool use","Deep technical expertise — architecture, training, evals"];
+const SATISFACTION_LABELS = ["","I have not used AI tools enough to assess","Very frustrated — outputs are rarely useful","Often disappointed with the results","Sometimes useful, often needs heavy editing","Getting decent results on simple tasks","Good results on most tasks with some prompting effort","Reliably good results, occasionally great","Consistently strong outputs with light prompting","Almost always happy with what I get","Outputs are excellent — AI genuinely amplifies my work"];
+const TOTAL_STEPS = 7;
+const ALL_PROD = PRODUCTIVITY_GROUPS.flatMap(g=>g.items);
+
+// ─── STYLES ───────────────────────────────────────────────────────────────────
+const S = {
+  wrap:   {minHeight:"100vh",background:"#0f1117",display:"flex",alignItems:"flex-start",justifyContent:"center",padding:"28px 16px",fontFamily:"'Inter',sans-serif"},
+  card:   {width:"100%",maxWidth:"640px",background:"#161b27",borderRadius:"18px",padding:"32px 36px",border:"1px solid rgba(255,255,255,0.07)",boxShadow:"0 24px 80px rgba(0,0,0,0.5)"},
+  btn:    {padding:"11px 24px",borderRadius:"9px",border:"none",background:"#4ade80",color:"#0f1117",fontFamily:"'Syne',sans-serif",fontWeight:"700",fontSize:"13px",cursor:"pointer"},
+  btnSec: {padding:"11px 20px",borderRadius:"9px",background:"transparent",border:"1px solid rgba(255,255,255,0.08)",color:"#64748b",fontFamily:"'Inter',sans-serif",fontWeight:"600",fontSize:"12px",cursor:"pointer"},
+  inp:    {width:"100%",padding:"10px 13px",borderRadius:"8px",background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.09)",color:"#e2e8f0",fontSize:"13px",outline:"none",boxSizing:"border-box"},
+  box:    {padding:"14px",borderRadius:"11px",background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.05)"},
+  lbl:    {fontSize:"13px",color:"#94a3b8",fontWeight:"500",lineHeight:"1.5"},
+};
+
+// ─── COMPONENTS ───────────────────────────────────────────────────────────────
+function Slider({value,onChange,labels,color="#4ade80"}) {
+  const pct = ((value-1)/9)*100;
+  return (
+    <div>
+      <div style={{display:"flex",alignItems:"center",gap:"14px",marginBottom:"10px"}}>
+        <input type="range" min={1} max={10} value={value} onChange={e=>onChange(+e.target.value)}
+          style={{flex:1,accentColor:color,background:`linear-gradient(to right,${color} ${pct}%,#2d3748 ${pct}%)`}} />
+        <span style={{minWidth:"42px",height:"42px",borderRadius:"50%",background:color,color:"#0f1117",fontWeight:"800",fontSize:"17px",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Syne',sans-serif",flexShrink:0}}>{value}</span>
+      </div>
+      {labels&&labels[value]&&<div style={{padding:"9px 13px",borderRadius:"8px",background:`${color}10`,border:`1px solid ${color}28`,fontSize:"12px",color:"#94a3b8",fontStyle:"italic"}}>"{labels[value]}"</div>}
+    </div>
+  );
+}
+
+function ToolRow({tool,value,onChange}) {
+  // value: 0=never heard, 1=know the name, 2=have used, 3=use very often, 4=used+frustrated
+  const isFrust = value===4;
+  const hasUsed = value===2||value===3||isFrust;
+  const displayVal = isFrust ? 2 : value; // show "have used" as selected when frustrated
+  return (
+    <div style={{padding:"9px 13px",borderRadius:"9px",background:isFrust?"rgba(251,146,60,0.06)":value>0?"rgba(74,222,128,0.06)":"rgba(255,255,255,0.02)",border:`1px solid ${isFrust?"rgba(251,146,60,0.25)":value>0?"rgba(74,222,128,0.2)":"rgba(255,255,255,0.05)"}`,transition:"all 0.2s"}}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:"10px"}}>
+        <span style={{color:"#e2e8f0",fontSize:"13px",fontWeight:"500",minWidth:"140px"}}>{tool.label}</span>
+        <div style={{display:"flex",gap:"4px"}}>
+          {[{v:0,s:"Never heard of it"},{v:1,s:"I know the name"},{v:2,s:"I have used it"},{v:3,s:"I use it very often"}].map(lvl=>(
+            <button key={lvl.v} onClick={()=>onChange(tool.id,lvl.v)}
+              style={{padding:"4px 9px",borderRadius:"5px",border:"none",cursor:"pointer",fontSize:"11px",fontWeight:"600",transition:"all 0.12s",background:displayVal===lvl.v?"#4ade80":"rgba(255,255,255,0.05)",color:displayVal===lvl.v?"#0f1117":"#64748b",whiteSpace:"nowrap"}}>
+              {lvl.s}
+            </button>
+          ))}
+        </div>
+      </div>
+      {hasUsed&&(
+        <div style={{marginTop:"6px",paddingTop:"6px",borderTop:"1px solid rgba(255,255,255,0.05)"}}>
+          <button onClick={()=>onChange(tool.id,isFrust?2:4)}
+            style={{fontSize:"11px",padding:"3px 10px",borderRadius:"5px",cursor:"pointer",fontWeight:"600",transition:"all 0.12s",
+              background:isFrust?"#fb923c":"transparent",
+              border:isFrust?"none":"1px dashed rgba(251,146,60,0.5)",
+              color:isFrust?"#0f1117":"#fb923c"}}>
+            {isFrust?"✓ Not happy with results":"+ I am not happy with the results I obtain"}
+          </button>
+          {isFrust&&(
+            <div style={{marginTop:"8px",display:"flex",flexDirection:"column",gap:"5px"}}>
+              {tool.training&&CATALOGUE.find(c=>c.id===tool.training)&&(
+                <a href={CATALOGUE.find(c=>c.id===tool.training).url} target="_blank" rel="noreferrer"
+                  style={{display:"inline-flex",alignItems:"center",gap:"6px",fontSize:"11px",padding:"4px 10px",borderRadius:"5px",background:"rgba(74,222,128,0.1)",color:"#4ade80",textDecoration:"none",fontWeight:"600",width:"fit-content"}}>
+                  📚 {CATALOGUE.find(c=>c.id===tool.training).title} — {CATALOGUE.find(c=>c.id===tool.training).duration}
+                </a>
+              )}
+
+              {tool.support&&(
+                <div style={{display:"inline-flex",alignItems:"center",gap:"6px",fontSize:"11px",padding:"4px 10px",borderRadius:"5px",background:"rgba(251,146,60,0.08)",width:"fit-content"}}>
+                  {tool.support.type==="email"
+                    ?<span style={{color:"#94a3b8"}}>🛟 Need help? <a href={`mailto:${tool.support.value}`} style={{color:"#fb923c",fontWeight:"700"}}>{tool.support.value}</a></span>
+                    :<span style={{color:"#94a3b8"}}>🛟 Need help? Join <span style={{color:"#fb923c",fontWeight:"700"}}>{tool.support.value}</span> on Slack</span>
+                  }
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// state: 0=not tried, 1=tried, 2=interested
+function CheckItem({item,state,onToggle,color}) {
+  const isTried     = state===1;
+  const isInterested= state===2;
+  const active      = isTried||isInterested;
+  const bg          = isTried?`${color}0e`:isInterested?"rgba(129,140,248,0.08)":"rgba(255,255,255,0.02)";
+  const border      = isTried?`${color}38`:isInterested?"rgba(129,140,248,0.35)":"rgba(255,255,255,0.05)";
+  return (
+    <div style={{padding:"9px 12px",borderRadius:"8px",background:bg,border:`1px solid ${border}`,transition:"all 0.14s"}}>
+      <div style={{display:"flex",alignItems:"flex-start",gap:"10px",marginBottom:active?"8px":"0"}}>
+        <div style={{width:"15px",height:"15px",borderRadius:"4px",flexShrink:0,marginTop:"1px",border:`2px solid ${isTried?color:isInterested?"#818cf8":"#374151"}`,background:isTried?color:isInterested?"#818cf8":"transparent",display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.14s"}}>
+          {isTried&&<span style={{color:"#0f1117",fontSize:"9px",fontWeight:"800"}}>✓</span>}
+          {isInterested&&<span style={{color:"#0f1117",fontSize:"9px",fontWeight:"800"}}>★</span>}
+        </div>
+        <span style={{color:active?"#f1f5f9":"#94a3b8",fontSize:"13px",lineHeight:"1.45",flex:1}}>{item.label}</span>
+      </div>
+      <div style={{display:"flex",gap:"5px",paddingLeft:"25px"}}>
+        {[{v:1,label:"I've tried it",c:color},{v:2,label:"Interested, haven't tried",c:"#818cf8"},{v:0,label:"Not applicable",c:"#475569"}].map(opt=>(
+          <button key={opt.v} onClick={()=>onToggle(item.id,opt.v)}
+            style={{fontSize:"10px",padding:"3px 8px",borderRadius:"5px",border:"none",cursor:"pointer",fontWeight:"600",transition:"all 0.12s",
+              background:state===opt.v?opt.c:"rgba(255,255,255,0.05)",
+              color:state===opt.v?"#0f1117":"#64748b"}}>
+            {opt.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function StepHeader({step}) {
+  return (
+    <div style={{fontSize:"10px",fontWeight:"700",letterSpacing:"0.15em",color:"#4ade80",textTransform:"uppercase",marginBottom:"8px",fontFamily:"'Syne',sans-serif"}}>
+      Question {step} / {TOTAL_STEPS}
+    </div>
+  );
+}
+
+
+// ── EMAIL BODY GENERATOR ──────────────────────────────────────────────────────
+function generateEmailBody(answers, recs, firstName) {
+  const roleName = answers.role==="BST"?"BST":answers.role==="CTM"?"Case Team Member":answers.role==="CTL"?"Case Team Leader":"MDP/MDSP";
+  const roleContext = answers.role==="MDP"?"As an MDP, we've kept formats short and high-impact.":answers.role==="CTL"?"As a Case Team Leader, we've focused on team productivity & client deliverables.":answers.role==="CTM"?"As a Case Team Member, you have the full range — from day-to-day productivity to advanced analysis.":"As a BST member, we've focused on tools that save time on daily tasks.";
+
+  const fmtItem = (item) => `• ${item.title} (${item.duration}) — ${item.type}${item.hasDeck?" [Slide deck available — read first]":""}
+  ${item.url}`;
+
+  const lines = [
+    `Hi ${firstName},`,
+    ``,
+    `Here is your personalised AI training plan based on your survey responses.`,
+    ``,
+    `──────────────────────────────`,
+    `YOUR PROFILE`,
+    `──────────────────────────────`,
+    `Role: ${roleName}`,
+    `AI fluency: ${answers.overallScore}/10`,
+    `Satisfaction with results: ${answers.satisfactionScore||"—"}/10`,
+    `LLM understanding: ${answers.llmKnowledge}/10`,
+    ``,
+    roleContext,
+    answers.topPriority ? `Priority area: ${answers.topPriority}` : "",
+    ``,
+    `──────────────────────────────`,
+    `YOUR TRAINING PLAN`,
+    `──────────────────────────────`,
+    ``,
+    `⚡ IF YOU HAVE 5 TO 15 MINUTES`,
+    ...(recs.fiveMin.length ? recs.fiveMin.map(fmtItem) : ["Nothing specific — you're good here!"]),
+    ``,
+    `🎯 IF YOU HAVE UP TO 1 HOUR`,
+    ...(recs.oneHour.length ? recs.oneHour.map(fmtItem) : ["Nothing specific — you're good here!"]),
+    ``,
+    `🚀 IF YOU WANT TO GO DEEPER (1H+)`,
+    ...(recs.threeHours.length ? recs.threeHours.map(fmtItem) : ["Nothing specific — you're good here!"]),
+    ``,
+    `──────────────────────────────`,
+    `💡 TIP: For masterclasses, read the slide deck first (~5 min). Watch the recorded session only if you want to go deeper.`,
+    ``,
+    `🎓 Browse the full AI training catalogue: https://lab.edcast.com/channel/35630/66319`,
+    ``,
+    `──────────────────────────────`,
+    `Good luck on your AI journey!`,
+    ``,
+  ];
+
+  return lines.filter(l => l !== undefined).join("\n");
+}
+
+function Results({answers, firstName}) {
+  const {fiveMin,oneHour,threeHours} = getRecommendations(answers);
+  const buckets = [
+    {label:"If you have 5 to 15 minutes",emoji:"⚡",color:"#4ade80",items:fiveMin},
+    {label:"If you have up to 1 hour",emoji:"🎯",color:"#22d3ee",items:oneHour},
+    {label:"If you want to go deeper (1h+)",emoji:"🚀",color:"#818cf8",items:threeHours},
+  ];
+  return (
+    <div>
+      <div style={{marginBottom:"20px"}}>
+        <div style={{fontSize:"10px",fontWeight:"700",letterSpacing:"0.15em",color:"#4ade80",textTransform:"uppercase",marginBottom:"8px",fontFamily:"'Syne',sans-serif"}}>Your results</div>
+        <h2 style={{fontSize:"22px",fontWeight:"700",color:"#f1f5f9",margin:"0 0 5px",fontFamily:"'Syne',sans-serif"}}>Your training plan, {firstName}</h2>
+
+        {/* Personalised context block */}
+        <div style={{marginTop:"12px",padding:"13px 16px",borderRadius:"10px",background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.08)",fontSize:"13px",color:"#94a3b8",lineHeight:"1.65"}}>
+          {/* Opening based on overall score */}
+          {answers.overallScore<=3&&<span>You're at the beginning of your AI journey — we've focused on <strong style={{color:"#f1f5f9"}}>discovery & foundations</strong> to help you get started quickly. </span>}
+          {answers.overallScore>=4&&answers.overallScore<=6&&<span>You have a solid base — we've focused on <strong style={{color:"#f1f5f9"}}>deepening your practice</strong> and unlocking use cases you haven't explored yet. </span>}
+          {answers.overallScore>=7&&<span>You're already an advanced user — we've focused on <strong style={{color:"#f1f5f9"}}>advanced workflows, automation, and client-facing innovation</strong>. </span>}
+
+          {/* Satisfaction gap */}
+          {answers.satisfactionScore&&answers.satisfactionScore<=4&&<span>Since you mentioned you're not happy with the results you get, we've prioritised <strong style={{color:"#f472b6"}}>prompting & output quality</strong> training. </span>}
+
+          {/* Priority */}
+          {answers.topPriority&&answers.topPriority.includes("prompting")&&<span>As you wanted to improve your prompting skills, we've included <strong style={{color:"#f1f5f9"}}>structured prompting resources</strong>. </span>}
+          {answers.topPriority&&answers.topPriority.includes("automating")&&<span>Since you're interested in automation, we've included <strong style={{color:"#f1f5f9"}}>task automation & agentic workflow</strong> resources. </span>}
+          {answers.topPriority&&answers.topPriority.includes("Team productivity")&&<span>To help your team work better with AI, we've included <strong style={{color:"#f1f5f9"}}>collaboration & team productivity</strong> resources. </span>}
+          {answers.topPriority&&answers.topPriority.includes("Client deliverables")&&<span>To help you innovate on client deliverables, we've included <strong style={{color:"#f1f5f9"}}>advanced client-facing AI tools</strong>. </span>}
+
+          {/* Role context */}
+          {answers.role==="MDP"&&<span>As an MDP, we've kept formats <strong style={{color:"#f1f5f9"}}>short and high-impact</strong> — read the deck, skip the full video unless curious. </span>}
+          {answers.role==="CTL"&&<span>As a Case Team Leader, we've focused on <strong style={{color:"#f1f5f9"}}>team productivity & client deliverables</strong>. </span>}
+          {answers.role==="CTM"&&<span>As a Case Team Member, you have the full range — from <strong style={{color:"#f1f5f9"}}>day-to-day productivity to advanced analysis</strong>. </span>}
+          {answers.role==="BST"&&<span>As a BST member, we've focused on <strong style={{color:"#f1f5f9"}}>tools that save time on daily tasks</strong> — email, Excel, automation. </span>}
+
+          {/* Blocker context */}
+          {answers.blockers&&answers.blockers.includes("Limited time to explore new tools")&&<span>Since time is your main constraint, <strong style={{color:"#4ade80"}}>everything below is under 15 minutes</strong>. For longer trainings, read the slide deck — it's usually 5 min and covers 80% of the value. </span>}
+          {answers.blockers&&answers.blockers.includes("Unsure where or how to start")&&<span>We've built a <strong style={{color:"#22d3ee"}}>navigation path</strong> — start with the first suggestion and follow the links from there. </span>}
+          {answers.blockers&&answers.blockers.includes("Output quality doesn't consistently meet my needs")&&<span>The resources below will help you <strong style={{color:"#f472b6"}}>get better results from the tools you already use</strong>. </span>}
+          {answers.blockers&&answers.blockers.includes("Unclear which tool is best suited for each task")&&<span>We've started with a <strong style={{color:"#818cf8"}}>tool discovery path</strong> to help you understand what's available and when to use each. </span>}
+          {answers.blockers&&answers.blockers.includes("Lack of organisational guidance or mandate")&&<span>We've picked <strong style={{color:"#fbbf24"}}>quick wins you can try today and share</strong> — the best way to build momentum without waiting for top-down direction. </span>}
+        </div>
+
+        {/* Deck tip for time-constrained */}
+        <div style={{marginTop:"8px",padding:"9px 14px",borderRadius:"8px",background:"rgba(74,222,128,0.05)",border:"1px solid rgba(74,222,128,0.12)",fontSize:"12px",color:"#4ade80"}}>
+          💡 <strong>Tip:</strong> For masterclasses, <strong>read the slide deck first</strong> (~5 min) — that covers most of the content. Watch the recorded session only if you want to go deeper.
+        </div>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:"6px",marginBottom:"24px"}}>
+        {[["Fluency",`${answers.overallScore}/10`,"#4ade80"],["LLM depth",`${answers.llmKnowledge}/10`,"#22d3ee"],["Tools weekly",`${Object.values(answers.toolUsage).filter(v=>v===3).length}/${TOOLS.length}`,"#818cf8"],["Use cases tried",`${Object.values(answers.productivityUsecases||{}).filter(v=>v===1).length}/${ALL_PROD.length}`,"#f472b6"]].map(([l,v,c])=>(
+          <div key={l} style={{padding:"10px 8px",borderRadius:"9px",background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.06)",textAlign:"center"}}>
+            <div style={{fontFamily:"'Syne',sans-serif",fontSize:"16px",fontWeight:"800",color:c}}>{v}</div>
+            <div style={{fontSize:"10px",color:"#475569",marginTop:"2px"}}>{l}</div>
+          </div>
+        ))}
+      </div>
+      {buckets.map(bucket=>(
+        <div key={bucket.label} style={{marginBottom:"20px"}}>
+          <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"10px"}}>
+            <span style={{fontSize:"15px"}}>{bucket.emoji}</span>
+            <span style={{fontFamily:"'Syne',sans-serif",fontSize:"13px",fontWeight:"700",color:bucket.color}}>{bucket.label}</span>
+            <div style={{flex:1,height:"1px",background:`${bucket.color}20`}}/>
+          </div>
+          {bucket.items.length===0
+            ?<div style={{fontSize:"12px",color:"#475569",fontStyle:"italic",paddingLeft:"24px"}}>Nothing specific — you're good here, keep exploring!</div>
+            :<div style={{display:"flex",flexDirection:"column",gap:"6px"}}>
+              {bucket.items.map(item=>(
+                <a key={item.id} href={item.url} target="_blank" rel="noreferrer"
+                  style={{display:"flex",alignItems:"center",gap:"10px",padding:"10px 13px",borderRadius:"9px",background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",textDecoration:"none"}}>
+                  <div style={{flex:1}}>
+                    <div style={{display:"flex",alignItems:"center",gap:"6px",flexWrap:"wrap"}}>
+                      <span style={{color:"#e2e8f0",fontSize:"13px",fontWeight:"500"}}>{item.title}</span>
+                      {item.topRated&&<span style={{fontSize:"9px",padding:"1px 6px",borderRadius:"99px",background:"rgba(251,191,36,0.15)",color:"#fbbf24",fontWeight:"700"}}>★ Top rated</span>}
+                      {item.tags&&item.tags.includes("external")&&<span style={{fontSize:"9px",padding:"1px 6px",borderRadius:"99px",background:"rgba(251,146,60,0.12)",color:"#fb923c",fontWeight:"700"}}>External & free</span>}
+                      {item.hasDeck&&<span style={{fontSize:"9px",padding:"1px 6px",borderRadius:"99px",background:"rgba(74,222,128,0.1)",color:"#4ade80",fontWeight:"700"}}>📄 Deck available</span>}
+                    </div>
+                    <div style={{display:"flex",alignItems:"center",gap:"8px",marginTop:"3px"}}>
+                      <span style={{fontSize:"10px",padding:"1px 6px",borderRadius:"99px",background:"rgba(255,255,255,0.05)",color:"#64748b",fontWeight:"600"}}>{item.type}</span>
+                      <span style={{fontSize:"11px",color:"#475569"}}>⏱ {item.duration}</span>
+                    </div>
+                  </div>
+                  <span style={{color:bucket.color,fontSize:"14px",flexShrink:0}}>→</span>
+                </a>
+              ))}
+            </div>
+          }
+        </div>
+      ))}
+      {answers.liveSession&&(
+        <div style={{marginBottom:"12px",padding:"12px 16px",borderRadius:"10px",background:"rgba(129,140,248,0.07)",border:"1px solid rgba(129,140,248,0.2)",fontSize:"12px",color:"#94a3b8"}}>
+          {answers.liveSession==="Yes"&&"✦ Great — we'll be in touch with details about the next live session."}
+          {answers.liveSession==="Maybe"&&"✦ We'll keep you posted on the next live session."}
+          {answers.liveSession==="No"&&"No problem — all resources are available on BCG LAB at your own pace."}
+        </div>
+      )}
+      {/* Copy plan to clipboard */}
+      <div style={{marginBottom:"12px"}}>
+        <button onClick={()=>{
+          const recs = getRecommendations(answers);
+          const emailParts = answers.email ? answers.email.split("@")[0].split(".") : ["there"];
+          const fn = emailParts[emailParts.length-1];
+          const fnFmt = fn.charAt(0).toUpperCase()+fn.slice(1).toLowerCase();
+          const body = generateEmailBody(answers, recs, fnFmt);
+          navigator.clipboard.writeText(body).then(()=>{
+            const btn = document.getElementById("copy-btn");
+            if(btn){ btn.textContent="✓ Copied to clipboard!"; setTimeout(()=>{ btn.textContent="📋 Copy my training plan to clipboard"; },2500); }
+          }).catch(()=>alert("Copy failed — please select the text manually."));
+        }} id="copy-btn"
+          style={{width:"100%",padding:"13px",borderRadius:"10px",border:"none",background:"linear-gradient(135deg,#4ade80,#22d3ee)",color:"#0f1117",fontFamily:"'Syne',sans-serif",fontWeight:"800",fontSize:"14px",cursor:"pointer"}}>
+          📋 Copy my training plan to clipboard
+        </button>
+        <p style={{fontSize:"11px",color:"#475569",textAlign:"center",marginTop:"6px"}}>Paste it into an email, Teams message, or notes app to save it.</p>
+      </div>
+
+      <div style={{padding:"12px 16px",borderRadius:"10px",background:"rgba(74,222,128,0.05)",border:"1px solid rgba(74,222,128,0.15)",fontSize:"12px",color:"#64748b",textAlign:"center"}}>
+        🎓 Want to explore more? Browse the full AI training catalogue on <a href="https://lab.edcast.com/channel/35630/66319" target="_blank" rel="noreferrer" style={{color:"#4ade80",fontWeight:"600"}}>BCG LAB</a>
+      </div>
+    </div>
+  );
+}
+
+// ─── APP ──────────────────────────────────────────────────────────────────────
+function App() {
+  const [step,setStep] = useState(0);
+  const [ans,setAns]   = useState({name:"",role:"",overallScore:5,satisfactionScore:5,llmKnowledge:5,toolUsage:{},productivityUsecases:{},clientUsecases:{},productivityOther:"",clientOther:"",topPriority:[],topPriorityOther:"",toolOther:"",blockers:[],freeText:"",liveSession:""});
+  const [done,setDone] = useState(false);
+
+  // Extract first name from BCG email (lastname.firstname@bcg.com)
+  const getFirstName = (email) => {
+    if (!email) return "there";
+    const local = email.split("@")[0];
+    if (!local) return "there";
+    const parts = local.split(".");
+    // BCG format is lastname.firstname — take the last part
+    const first = parts[parts.length - 1];
+    return first.charAt(0).toUpperCase() + first.slice(1).toLowerCase();
+  };
+  const firstName = getFirstName(ans.email);
+
+  const set    = (k,v) => setAns(a=>({...a,[k]:v}));
+  const toggle = (k,v) => setAns(a=>({...a,[k]:a[k].includes(v)?a[k].filter(x=>x!==v):[...a[k],v]}));
+  const setUsecase = (k,id,val) => setAns(a=>({...a,[k]:{...a[k],[id]:val}}));
+  const setTool = (id,val) => setAns(a=>({...a,toolUsage:{...a.toolUsage,[id]:val}}));
+  const canGo = step===1 ? (ans.email&&ans.email.includes('@bcg.com') && ans.role.length>0) : true;
+
+  const bar = <div style={{height:"3px",borderRadius:"99px",margin:"0 0 34px",background:"linear-gradient(90deg,#4ade80,#22d3ee,#818cf8)",width:done?"100%":`${(step/TOTAL_STEPS)*100}%`,transition:"width 0.4s",minWidth:step>0?"4%":"0"}}/>;
+
+  return (
+    <div style={S.wrap}>
+      <div style={S.card}>
+        <div style={{marginBottom:"6px"}}>
+          <div style={{display:"flex",alignItems:"center",gap:"9px",marginBottom:"6px"}}>
+            <div style={{width:"24px",height:"24px",borderRadius:"6px",background:"linear-gradient(135deg,#4ade80,#22d3ee)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"12px"}}>✦</div>
+            <span style={{fontFamily:"'Syne',sans-serif",fontSize:"10px",color:"#4ade80",letterSpacing:"0.15em",textTransform:"uppercase",fontWeight:"700"}}>AI Fluency Survey · Health Care Services</span>
+          </div>
+          {bar}
+        </div>
+
+        {done && <Results answers={ans} firstName={firstName}/>}
+
+        {/* INTRO */}
+        {!done&&step===0&&(
+          <div>
+            <h1 style={{fontFamily:"'Syne',sans-serif",fontSize:"clamp(22px,4vw,32px)",fontWeight:"800",color:"#f1f5f9",margin:"0 0 12px",lineHeight:"1.2"}}>
+              Where are you on<br/>
+              <span style={{background:"linear-gradient(90deg,#4ade80,#22d3ee)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>your AI journey?</span>
+            </h1>
+            <p style={{color:"#64748b",fontSize:"13px",lineHeight:"1.75",marginBottom:"24px",maxWidth:"440px"}}>
+              This short survey (~5 min) maps your current AI fluency. At the end, you'll get a personalised training plan you can copy and keep.
+            </p>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"8px",marginBottom:"24px"}}>
+              {[["7","Questions"],["~5 min","Time needed"]].map(([v,l])=>(
+                <div key={l} style={{padding:"13px",borderRadius:"9px",background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.07)",textAlign:"center"}}>
+                  <div style={{fontFamily:"'Syne',sans-serif",fontSize:"19px",fontWeight:"800",color:"#4ade80"}}>{v}</div>
+                  <div style={{fontSize:"11px",color:"#475569",marginTop:"2px"}}>{l}</div>
+                </div>
+              ))}
+              {/* AI-powered plan highlight */}
+              <div style={{gridColumn:"1 / -1",padding:"14px 18px",borderRadius:"11px",background:"linear-gradient(135deg,rgba(74,222,128,0.12),rgba(34,211,238,0.08))",border:"1px solid rgba(74,222,128,0.3)",display:"flex",alignItems:"center",gap:"12px"}}>
+                <div style={{width:"36px",height:"36px",borderRadius:"9px",background:"linear-gradient(135deg,#4ade80,#22d3ee)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"18px",flexShrink:0}}>✦</div>
+                <div>
+                  <div style={{fontFamily:"'Syne',sans-serif",fontSize:"13px",fontWeight:"800",color:"#f1f5f9"}}>AI-powered personalized training plan</div>
+                  <div style={{fontSize:"11px",color:"#64748b",marginTop:"2px"}}>Based on your role, tools, use cases & goals — you'll get a curated list of resources you can copy at the end</div>
+                </div>
+              </div>
+            </div>
+            <button onClick={()=>setStep(1)} style={S.btn}>Start survey →</button>
+          </div>
+        )}
+
+        {/* STEP 1 – Name + Role */}
+        {!done&&step===1&&(
+          <div>
+            <StepHeader step={1}/>
+            <h2 style={{fontSize:"22px",fontWeight:"700",color:"#f1f5f9",margin:"0 0 4px",fontFamily:"'Syne',sans-serif"}}>Let's start with you</h2>
+            <p style={{color:"#64748b",fontSize:"13px",margin:"0 0 20px"}}>This helps us tailor training recommendations to your context.</p>
+            <div style={{display:"flex",flexDirection:"column",gap:"14px"}}>
+              <div>
+                <label style={{...S.lbl,display:"block",marginBottom:"6px",fontWeight:"600",color:"#cbd5e1"}}>Your BCG email <span style={{color:"#475569",fontWeight:"400"}}>(used to personalise your training plan)</span></label>
+                <input value={ans.email||""} onChange={e=>set("email",e.target.value)} placeholder="firstname.lastname@bcg.com" style={S.inp} type="email" autoFocus/>
+              </div>
+              <div>
+                <label style={{...S.lbl,display:"block",marginBottom:"10px",fontWeight:"600",color:"#cbd5e1"}}>Your role</label>
+                <div style={{display:"flex",flexDirection:"column",gap:"6px"}}>
+                  {[
+                    {v:"BST",label:"BST",desc:"Business Services Team"},
+                    {v:"CTM",label:"Case Team Member",desc:"Associate, Consultant"},
+                    {v:"CTL",label:"Case Team Leader",desc:"Project Leader, Principal"},
+                    {v:"MDP",label:"MDP / MDSP",desc:"Managing Director & Partner"},
+                  ].map(({v,label,desc})=>{
+                    const sel=ans.role===v;
+                    return (
+                      <div key={v} onClick={()=>set("role",v)} style={{display:"flex",alignItems:"center",gap:"12px",padding:"10px 14px",borderRadius:"9px",cursor:"pointer",transition:"all 0.14s",background:sel?"rgba(74,222,128,0.1)":"rgba(255,255,255,0.02)",border:`1px solid ${sel?"rgba(74,222,128,0.4)":"rgba(255,255,255,0.06)"}`}}>
+                        <div style={{width:"15px",height:"15px",borderRadius:"50%",flexShrink:0,border:`2px solid ${sel?"#4ade80":"#374151"}`,background:sel?"#4ade80":"transparent"}}/>
+                        <div>
+                          <div style={{fontSize:"13px",fontWeight:"600",color:sel?"#f1f5f9":"#94a3b8"}}>{label}</div>
+                          <div style={{fontSize:"11px",color:"#475569",marginTop:"1px"}}>{desc}</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* STEP 2 – Self-assessment */}
+        {!done&&step===2&&(
+          <div>
+            <StepHeader step={2}/>
+            <h2 style={{fontSize:"22px",fontWeight:"700",color:"#f1f5f9",margin:"0 0 4px",fontFamily:"'Syne',sans-serif"}}>How would you rate your current comfort level with AI?</h2>
+            <p style={{color:"#64748b",fontSize:"13px",margin:"0 0 20px"}}>Be honest — this is a starting point, not a test.</p>
+            <div style={{display:"flex",flexDirection:"column",gap:"20px"}}>
+              <div style={S.box}>
+                <label style={{...S.lbl,display:"block",marginBottom:"6px"}}>Overall, how comfortable are you with AI tools today?</label>
+                <p style={{fontSize:"11px",color:"#475569",margin:"0 0 13px"}}>1 = never used AI &nbsp;·&nbsp; 10 = use it daily across multiple tools</p>
+                <Slider value={ans.overallScore} onChange={v=>set("overallScore",v)} labels={OVERALL_LABELS} color="#4ade80"/>
+              </div>
+              <div style={S.box}>
+                <label style={{...S.lbl,display:"block",marginBottom:"6px"}}>How satisfied are you with the results you get from AI tools?</label>
+                <p style={{fontSize:"11px",color:"#475569",margin:"0 0 13px"}}>1 = very frustrated &nbsp;·&nbsp; 10 = consistently getting great results</p>
+                <Slider value={ans.satisfactionScore} onChange={v=>set("satisfactionScore",v)} labels={SATISFACTION_LABELS} color="#f472b6"/>
+              </div>
+              <div style={S.box}>
+                <label style={{...S.lbl,display:"block",marginBottom:"6px"}}>How well do you understand how LLMs work?</label>
+                <p style={{fontSize:"11px",color:"#475569",margin:"0 0 13px"}}>1 = no idea &nbsp;·&nbsp; 10 = deep technical understanding</p>
+                <Slider value={ans.llmKnowledge} onChange={v=>set("llmKnowledge",v)} labels={LLM_LABELS} color="#22d3ee"/>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* STEP 8 */}
+        {!done&&step===4&&(
+          <div>
+            <StepHeader step={4}/>
+            <h2 style={{fontSize:"22px",fontWeight:"700",color:"#f1f5f9",margin:"0 0 4px",fontFamily:"'Syne',sans-serif"}}>AI tools & platforms</h2>
+            <p style={{color:"#64748b",fontSize:"13px",margin:"0 0 16px"}}>Select how often you use each tool. After selecting a frequency, you may optionally indicate if you are unsatisfied with the results.</p>
+            <div style={{display:"flex",flexDirection:"column",gap:"6px",maxHeight:"420px",overflowY:"auto",paddingRight:"3px"}}>
+              {TOOLS.map(t=><ToolRow key={t.id} tool={t} value={ans.toolUsage[t.id]||0} onChange={setTool}/>)}
+            </div>
+            <div style={{marginTop:"12px"}}>
+              <label style={{...S.lbl,display:"block",marginBottom:"5px"}}>Other AI tools you use regularly?</label>
+              <input value={ans.toolOther} onChange={e=>set("toolOther",e.target.value)} placeholder="Tool name(s)…" style={S.inp}/>
+            </div>
+          </div>
+        )}
+
+        {/* STEP 8 */}
+        {!done&&step===5&&(
+          <div>
+            <StepHeader step={5}/>
+            <h2 style={{fontSize:"22px",fontWeight:"700",color:"#f1f5f9",margin:"0 0 4px",fontFamily:"'Syne',sans-serif"}}>AI for team productivity</h2>
+            <p style={{color:"#64748b",fontSize:"13px",margin:"0 0 16px"}}>Which of these have you already explored or implemented?</p>
+            <div style={{maxHeight:"440px",overflowY:"auto",paddingRight:"3px"}}>
+              {PRODUCTIVITY_GROUPS.map(group=>(
+                <div key={group.id} style={{marginBottom:"16px"}}>
+                  <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"7px"}}>
+                    <div style={{height:"1px",flex:1,background:`${group.color}25`}}/>
+                    <span style={{fontSize:"10px",fontWeight:"700",letterSpacing:"0.12em",textTransform:"uppercase",color:group.color,padding:"2px 10px",borderRadius:"99px",background:`${group.color}12`,border:`1px solid ${group.color}25`,flexShrink:0}}>{group.label}</span>
+                    <div style={{height:"1px",flex:1,background:`${group.color}25`}}/>
+                  </div>
+                  <div style={{display:"flex",flexDirection:"column",gap:"5px"}}>
+                    {group.items.map(item=><CheckItem key={item.id} item={item} state={ans.productivityUsecases[item.id]||0} onToggle={(id,val)=>setUsecase("productivityUsecases",id,val)} color={group.color}/>)}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div style={{marginTop:"8px"}}>
+              <label style={{...S.lbl,display:"block",marginBottom:"5px"}}>Other productivity use cases you've tried?</label>
+              <input value={ans.productivityOther} onChange={e=>set("productivityOther",e.target.value)} placeholder="Describe briefly…" style={S.inp}/>
+            </div>
+          </div>
+        )}
+
+        {/* STEP 8 */}
+        {!done&&step===6&&(
+          <div>
+            <StepHeader step={6}/>
+            <h2 style={{fontSize:"22px",fontWeight:"700",color:"#f1f5f9",margin:"0 0 4px",fontFamily:"'Syne',sans-serif"}}>AI for client deliverables</h2>
+            <p style={{color:"#64748b",fontSize:"13px",margin:"0 0 16px"}}>Which have you proposed, piloted, or delivered to clients?</p>
+            <div style={{display:"flex",flexDirection:"column",gap:"5px"}}>
+              {CLIENT_USECASES.map(item=>(
+                <div key={item.id}>
+                  <CheckItem item={item} state={ans.clientUsecases[item.id]||0} onToggle={(id,val)=>setUsecase("clientUsecases",id,val)} color="#22d3ee"/>
+                  {item.tools&&ans.clientUsecases[item.id]===2&&(
+                    <div style={{marginTop:"4px",marginBottom:"2px",paddingLeft:"25px",fontSize:"11px",color:"#475569"}}>
+                      🛠 Key tools to get started: <span style={{color:"#22d3ee",fontWeight:"600"}}>{item.tools[0]}</span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+            <div style={{marginTop:"12px"}}>
+              <label style={{...S.lbl,display:"block",marginBottom:"5px"}}>Other AI-powered deliverables you've explored with clients?</label>
+              <input value={ans.clientOther} onChange={e=>set("clientOther",e.target.value)} placeholder="Describe briefly…" style={S.inp}/>
+            </div>
+          </div>
+        )}
+
+        {/* STEP 8 */}
+        {!done&&step===3&&(
+          <div>
+            <StepHeader step={3}/>
+            <h2 style={{fontSize:"22px",fontWeight:"700",color:"#f1f5f9",margin:"0 0 4px",fontFamily:"'Syne',sans-serif"}}>What are your AI learning goals?</h2>
+            <p style={{color:"#64748b",fontSize:"13px",margin:"0 0 16px"}}>Select up to 2 areas you'd most like to develop in the next 3 months.</p>
+            <div style={S.box}>
+              {[
+                {label:"My own productivity — prompting & working effectively with LLMs",tag:"Personal",color:"#4ade80"},
+                {label:"My own productivity — automating repetitive daily tasks",tag:"Personal",color:"#4ade80"},
+                {label:"Team productivity — new AI workflows & ways of working",tag:"Team",color:"#22d3ee"},
+                {label:"Team productivity — building agentic or automated pipelines",tag:"Team",color:"#22d3ee"},
+                {label:"Client deliverables — new AI-powered formats & leave-behinds",tag:"Client",color:"#818cf8"},
+                {label:"Client deliverables — embedding AI tools in client workflows",tag:"Client",color:"#818cf8"},
+              ].map(({label,tag,color})=>{
+                const sel=ans.topPriority.includes(label);
+                const maxReached=ans.topPriority.length>=2&&!sel;
+                return (
+                  <div key={label} onClick={()=>{
+                    if(sel) set("topPriority",ans.topPriority.filter(x=>x!==label));
+                    else if(!maxReached) set("topPriority",[...ans.topPriority,label]);
+                  }} style={{padding:"10px 13px",borderRadius:"8px",cursor:maxReached?"default":"pointer",marginBottom:"5px",fontSize:"13px",transition:"all 0.14s",background:sel?`${color}10`:maxReached?"rgba(255,255,255,0.01)":"rgba(255,255,255,0.02)",border:`1px solid ${sel?color+"38":"rgba(255,255,255,0.05)"}`,color:sel?"#f1f5f9":maxReached?"#374151":"#94a3b8",display:"flex",alignItems:"center",gap:"10px",opacity:maxReached?0.45:1}}>
+                    <div style={{width:"14px",height:"14px",borderRadius:"3px",flexShrink:0,border:`2px solid ${sel?color:"#374151"}`,background:sel?color:"transparent",display:"flex",alignItems:"center",justifyContent:"center"}}>
+                      {sel&&<span style={{color:"#0f1117",fontSize:"9px",fontWeight:"800"}}>✓</span>}
+                    </div>
+                    <span style={{flex:1}}>{label}</span>
+                    <span style={{fontSize:"9px",padding:"2px 6px",borderRadius:"99px",background:sel?`${color}20`:"rgba(255,255,255,0.04)",color:sel?color:"#374151",fontWeight:"700",flexShrink:0}}>{tag}</span>
+                  </div>
+                );
+              })}
+              <div style={{marginTop:"10px"}}>
+                <label style={{...S.lbl,display:"block",marginBottom:"5px",fontSize:"12px"}}>Other learning goal <span style={{color:"#475569"}}>(optional)</span></label>
+                <input value={ans.topPriorityOther||""} onChange={e=>set("topPriorityOther",e.target.value)} placeholder="Describe any other area you'd like to develop…" style={{...S.inp,fontSize:"12px"}}/>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {!done&&step===7&&(
+          <div>
+            <StepHeader step={7}/>
+            <h2 style={{fontSize:"22px",fontWeight:"700",color:"#f1f5f9",margin:"0 0 4px",fontFamily:"'Syne',sans-serif"}}>Last two things</h2>
+            <div style={{display:"flex",flexDirection:"column",gap:"18px"}}>
+              <div style={S.box}>
+                <label style={{...S.lbl,display:"block",marginBottom:"10px",fontWeight:"600",color:"#cbd5e1"}}>What factors influence how frequently you use AI tools? <span style={{color:"#475569",fontWeight:"400"}}>(select all that apply)</span></label>
+                {[
+                  {label:"Not enough time to explore",                        hint:"→ We'll prioritise 5-min formats only",           hintColor:"#4ade80"},
+                  {label:"Don't know where to start",                         hint:"→ We'll suggest a clear navigation path first",   hintColor:"#22d3ee"},
+                  {label:"Client data security & confidentiality concerns",   hint:"→ We'll start with Responsible AI resources",     hintColor:"#fb923c"},
+                  {label:"Outputs aren't reliable or consistent enough yet",  hint:"→ We'll focus on prompting & output quality",     hintColor:"#f472b6"},
+                  {label:"Unclear which tool to use for which task",          hint:"→ We'll help you map the right tool per task",    hintColor:"#818cf8"},
+                  {label:"No strong signal or mandate from leadership",        hint:"→ We'll suggest easy wins you can start today",   hintColor:"#fbbf24"},
+                ].map(({label,hint,hintColor})=>{
+                  const checked=ans.blockers.includes(label);
+                  return (
+                    <div key={label} onClick={()=>toggle("blockers",label)} style={{padding:"9px 12px",borderRadius:"8px",cursor:"pointer",marginBottom:"5px",fontSize:"13px",transition:"all 0.14s",background:checked?"rgba(251,146,60,0.08)":"rgba(255,255,255,0.02)",border:`1px solid ${checked?"rgba(251,146,60,0.3)":"rgba(255,255,255,0.05)"}`,transition:"all 0.14s"}}>
+                      <div style={{display:"flex",alignItems:"center",gap:"10px"}}>
+                        <div style={{width:"14px",height:"14px",borderRadius:"3px",flexShrink:0,border:`2px solid ${checked?"#fb923c":"#374151"}`,background:checked?"#fb923c":"transparent",display:"flex",alignItems:"center",justifyContent:"center"}}>
+                          {checked&&<span style={{color:"#0f1117",fontSize:"9px",fontWeight:"800"}}>✓</span>}
+                        </div>
+                        <span style={{color:checked?"#fed7aa":"#94a3b8"}}>{label}</span>
+                      </div>
+                      {checked&&(
+                        <div style={{marginTop:"5px",paddingLeft:"24px",fontSize:"11px",color:hintColor,fontStyle:"italic"}}>
+                          {hint}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              <div style={S.box}>
+                <label style={{...S.lbl,display:"block",marginBottom:"6px",fontWeight:"600",color:"#cbd5e1"}}>Would you join a 2h live virtual session covering the key tools & use cases, with hands-on practice?</label>
+                <p style={{fontSize:"12px",color:"#475569",margin:"0 0 10px"}}>Small group, interactive, designed for senior consultants.</p>
+                <div style={{display:"flex",gap:"8px"}}>
+                  {["Yes","Maybe","No"].map(opt=>{
+                    const sel=ans.liveSession===opt;
+                    const color=opt==="Yes"?"#4ade80":opt==="Maybe"?"#22d3ee":"#64748b";
+                    return (
+                      <button key={opt} onClick={()=>set("liveSession",opt)}
+                        style={{flex:1,padding:"10px",borderRadius:"8px",border:`1px solid ${sel?color+"55":"rgba(255,255,255,0.07)"}`,background:sel?`${color}12`:"rgba(255,255,255,0.02)",color:sel?color:"#64748b",fontFamily:"'Syne',sans-serif",fontWeight:"700",fontSize:"13px",cursor:"pointer",transition:"all 0.14s"}}>
+                        {opt}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+              <div>
+                <label style={{...S.lbl,display:"block",marginBottom:"5px"}}>Anything else — topics, specific requests, use cases to explore?</label>
+                <textarea value={ans.freeText} onChange={e=>set("freeText",e.target.value)} placeholder="Free text…" rows={3} style={{...S.inp,resize:"vertical",fontFamily:"inherit"}}/>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* NAV */}
+        {!done&&step>0&&(
+          <div style={{display:"flex",justifyContent:"space-between",marginTop:"26px",gap:"10px"}}>
+            <button onClick={()=>setStep(s=>s-1)} style={S.btnSec}>← Back</button>
+            {step<TOTAL_STEPS
+              ?<button onClick={()=>setStep(s=>s+1)} disabled={!canGo} style={{...S.btn,opacity:canGo?1:0.4,cursor:canGo?"pointer":"default"}}>Continue →</button>
+              :<button onClick={()=>{
+              // Submit to Google Sheets via Apps Script Web App
+              const payload = {
+                email:        ans.email||"",
+                role:         ans.role||"",
+                fluency:      ans.overallScore,
+                satisfaction: ans.satisfactionScore||"",
+                llm:          ans.llmKnowledge,
+                tools_weekly: TOOLS.filter(t=>(ans.toolUsage[t.id]||0)===3).map(t=>t.label).join(", "),
+                tools_frustrated: TOOLS.filter(t=>(ans.toolUsage[t.id]||0)===4).map(t=>t.label).join(", "),
+                prod_tried:   Object.entries(ans.productivityUsecases).filter(([,v])=>v===1).map(([k])=>k).join(", "),
+                prod_interested: Object.entries(ans.productivityUsecases).filter(([,v])=>v===2).map(([k])=>k).join(", "),
+                client_tried: Object.entries(ans.clientUsecases).filter(([,v])=>v===1).map(([k])=>k).join(", "),
+                client_interested: Object.entries(ans.clientUsecases).filter(([,v])=>v===2).map(([k])=>k).join(", "),
+                priority:     (ans.topPriority||[]).join(" | "),
+                priority_other: ans.topPriorityOther||"",
+                blockers:     (ans.blockers||[]).join(" | "),
+                live_session: ans.liveSession||"",
+                comments:     ans.freeText||"",
+                recs_5min:    getRecommendations(ans).fiveMin.map(i=>i.title).join(" | "),
+                recs_1h:      getRecommendations(ans).oneHour.map(i=>i.title).join(" | "),
+                recs_deep:    getRecommendations(ans).threeHours.map(i=>i.title).join(" | "),
+                timestamp:    new Date().toISOString(),
+              };
+              fetch("APPS_SCRIPT_URL", {
+                method:"POST",
+                mode:"no-cors",
+                headers:{"Content-Type":"application/json"},
+                body:JSON.stringify(payload)
+              }).catch(()=>{}); // silent fail — never block user
+              setDone(true);
+            }} style={{...S.btn,background:"linear-gradient(135deg,#4ade80,#22d3ee)"}}>See my training plan ✦</button>
+            }
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
