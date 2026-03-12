@@ -739,7 +739,7 @@ function Results({answers, firstName}) {
 // ─── APP ──────────────────────────────────────────────────────────────────────
 function App() {
   const [step,setStep] = useState(0);
-  const [ans,setAns]   = useState({name:"",role:"",overallScore:5,satisfactionScore:5,llmKnowledge:5,toolUsage:{},productivityUsecases:{},clientUsecases:{},productivityOther:"",clientOther:"",topPriority:[],topPriorityOther:"",toolOther:"",blockers:[],freeText:"",liveSession:""});
+  const [ans,setAns]   = useState({email:"",role:"",overallScore:5,satisfactionScore:5,llmKnowledge:5,toolUsage:{},productivityUsecases:{},clientUsecases:{},productivityOther:"",clientOther:"",topPriority:[],topPriorityOther:"",toolOther:"",blockers:[],freeText:"",liveSession:""});
   const [done,setDone] = useState(false);
 
   // Extract first name from BCG email (lastname.firstname@bcg.com)
@@ -758,7 +758,7 @@ function App() {
   const toggle = (k,v) => setAns(a=>({...a,[k]:a[k].includes(v)?a[k].filter(x=>x!==v):[...a[k],v]}));
   const setUsecase = (k,id,val) => setAns(a=>({...a,[k]:{...a[k],[id]:val}}));
   const setTool = (id,val) => setAns(a=>({...a,toolUsage:{...a.toolUsage,[id]:val}}));
-  const canGo = step===1 ? (ans.email&&ans.email.includes('@bcg.com') && ans.role.length>0) : true;
+  const canGo = step===1 ? ((ans.email||'').includes('@bcg.com') && ans.role.length>0) : true;
 
   const bar = <div style={{height:"3px",borderRadius:"99px",margin:"0 0 34px",background:"linear-gradient(90deg,#4ade80,#22d3ee,#818cf8)",width:done?"100%":`${(step/TOTAL_STEPS)*100}%`,transition:"width 0.4s",minWidth:step>0?"4%":"0"}}/>;
 
@@ -776,7 +776,7 @@ function App() {
         {done && <Results answers={ans} firstName={firstName}/>}
 
         {/* INTRO */}
-        {!done&&step===0&&(
+{!done&&step===0&&(
           <div>
             <h1 style={{fontFamily:"'Syne',sans-serif",fontSize:"clamp(22px,4vw,32px)",fontWeight:"800",color:"#f1f5f9",margin:"0 0 12px",lineHeight:"1.2"}}>
               Where are you on<br/>
@@ -867,76 +867,6 @@ function App() {
             </div>
           </div>
         )}
-
-        {/* STEP 8 */}
-        {!done&&step===4&&(
-          <div>
-            <StepHeader step={4}/>
-            <h2 style={{fontSize:"22px",fontWeight:"700",color:"#f1f5f9",margin:"0 0 4px",fontFamily:"'Syne',sans-serif"}}>AI tools & platforms</h2>
-            <p style={{color:"#64748b",fontSize:"13px",margin:"0 0 16px"}}>Select how often you use each tool. After selecting a frequency, you may optionally indicate if you are unsatisfied with the results.</p>
-            <div style={{display:"flex",flexDirection:"column",gap:"6px",maxHeight:"420px",overflowY:"auto",paddingRight:"3px"}}>
-              {TOOLS.map(t=><ToolRow key={t.id} tool={t} value={ans.toolUsage[t.id]||0} onChange={setTool}/>)}
-            </div>
-            <div style={{marginTop:"12px"}}>
-              <label style={{...S.lbl,display:"block",marginBottom:"5px"}}>Other AI tools you use regularly?</label>
-              <input value={ans.toolOther} onChange={e=>set("toolOther",e.target.value)} placeholder="Tool name(s)…" style={S.inp}/>
-            </div>
-          </div>
-        )}
-
-        {/* STEP 8 */}
-        {!done&&step===5&&(
-          <div>
-            <StepHeader step={5}/>
-            <h2 style={{fontSize:"22px",fontWeight:"700",color:"#f1f5f9",margin:"0 0 4px",fontFamily:"'Syne',sans-serif"}}>AI for team productivity</h2>
-            <p style={{color:"#64748b",fontSize:"13px",margin:"0 0 16px"}}>Which of these have you already explored or implemented?</p>
-            <div style={{maxHeight:"440px",overflowY:"auto",paddingRight:"3px"}}>
-              {PRODUCTIVITY_GROUPS.map(group=>(
-                <div key={group.id} style={{marginBottom:"16px"}}>
-                  <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"7px"}}>
-                    <div style={{height:"1px",flex:1,background:`${group.color}25`}}/>
-                    <span style={{fontSize:"10px",fontWeight:"700",letterSpacing:"0.12em",textTransform:"uppercase",color:group.color,padding:"2px 10px",borderRadius:"99px",background:`${group.color}12`,border:`1px solid ${group.color}25`,flexShrink:0}}>{group.label}</span>
-                    <div style={{height:"1px",flex:1,background:`${group.color}25`}}/>
-                  </div>
-                  <div style={{display:"flex",flexDirection:"column",gap:"5px"}}>
-                    {group.items.map(item=><CheckItem key={item.id} item={item} state={ans.productivityUsecases[item.id]||0} onToggle={(id,val)=>setUsecase("productivityUsecases",id,val)} color={group.color}/>)}
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div style={{marginTop:"8px"}}>
-              <label style={{...S.lbl,display:"block",marginBottom:"5px"}}>Other productivity use cases you've tried?</label>
-              <input value={ans.productivityOther} onChange={e=>set("productivityOther",e.target.value)} placeholder="Describe briefly…" style={S.inp}/>
-            </div>
-          </div>
-        )}
-
-        {/* STEP 8 */}
-        {!done&&step===6&&(
-          <div>
-            <StepHeader step={6}/>
-            <h2 style={{fontSize:"22px",fontWeight:"700",color:"#f1f5f9",margin:"0 0 4px",fontFamily:"'Syne',sans-serif"}}>AI for client deliverables</h2>
-            <p style={{color:"#64748b",fontSize:"13px",margin:"0 0 16px"}}>Which have you proposed, piloted, or delivered to clients?</p>
-            <div style={{display:"flex",flexDirection:"column",gap:"5px"}}>
-              {CLIENT_USECASES.map(item=>(
-                <div key={item.id}>
-                  <CheckItem item={item} state={ans.clientUsecases[item.id]||0} onToggle={(id,val)=>setUsecase("clientUsecases",id,val)} color="#22d3ee"/>
-                  {item.tools&&ans.clientUsecases[item.id]===2&&(
-                    <div style={{marginTop:"4px",marginBottom:"2px",paddingLeft:"25px",fontSize:"11px",color:"#475569"}}>
-                      🛠 Key tools to get started: <span style={{color:"#22d3ee",fontWeight:"600"}}>{item.tools[0]}</span>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-            <div style={{marginTop:"12px"}}>
-              <label style={{...S.lbl,display:"block",marginBottom:"5px"}}>Other AI-powered deliverables you've explored with clients?</label>
-              <input value={ans.clientOther} onChange={e=>set("clientOther",e.target.value)} placeholder="Describe briefly…" style={S.inp}/>
-            </div>
-          </div>
-        )}
-
-        {/* STEP 8 */}
         {!done&&step===3&&(
           <div>
             <StepHeader step={3}/>
@@ -974,6 +904,68 @@ function App() {
           </div>
         )}
 
+        {!done&&step===4&&(
+          <div>
+            <StepHeader step={4}/>
+            <h2 style={{fontSize:"22px",fontWeight:"700",color:"#f1f5f9",margin:"0 0 4px",fontFamily:"'Syne',sans-serif"}}>AI tools & platforms</h2>
+            <p style={{color:"#64748b",fontSize:"13px",margin:"0 0 16px"}}>Select how often you use each tool. After selecting a frequency, you may optionally indicate if you are unsatisfied with the results.</p>
+            <div style={{display:"flex",flexDirection:"column",gap:"6px",maxHeight:"420px",overflowY:"auto",paddingRight:"3px"}}>
+              {TOOLS.map(t=><ToolRow key={t.id} tool={t} value={ans.toolUsage[t.id]||0} onChange={setTool}/>)}
+            </div>
+            <div style={{marginTop:"12px"}}>
+              <label style={{...S.lbl,display:"block",marginBottom:"5px"}}>Other AI tools you use regularly?</label>
+              <input value={ans.toolOther} onChange={e=>set("toolOther",e.target.value)} placeholder="Tool name(s)…" style={S.inp}/>
+            </div>
+          </div>
+        )}
+        {!done&&step===5&&(
+          <div>
+            <StepHeader step={5}/>
+            <h2 style={{fontSize:"22px",fontWeight:"700",color:"#f1f5f9",margin:"0 0 4px",fontFamily:"'Syne',sans-serif"}}>AI for team productivity</h2>
+            <p style={{color:"#64748b",fontSize:"13px",margin:"0 0 16px"}}>Which of these have you already explored or implemented?</p>
+            <div style={{maxHeight:"440px",overflowY:"auto",paddingRight:"3px"}}>
+              {PRODUCTIVITY_GROUPS.map(group=>(
+                <div key={group.id} style={{marginBottom:"16px"}}>
+                  <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"7px"}}>
+                    <div style={{height:"1px",flex:1,background:`${group.color}25`}}/>
+                    <span style={{fontSize:"10px",fontWeight:"700",letterSpacing:"0.12em",textTransform:"uppercase",color:group.color,padding:"2px 10px",borderRadius:"99px",background:`${group.color}12`,border:`1px solid ${group.color}25`,flexShrink:0}}>{group.label}</span>
+                    <div style={{height:"1px",flex:1,background:`${group.color}25`}}/>
+                  </div>
+                  <div style={{display:"flex",flexDirection:"column",gap:"5px"}}>
+                    {group.items.map(item=><CheckItem key={item.id} item={item} state={ans.productivityUsecases[item.id]||0} onToggle={(id,val)=>setUsecase("productivityUsecases",id,val)} color={group.color}/>)}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div style={{marginTop:"8px"}}>
+              <label style={{...S.lbl,display:"block",marginBottom:"5px"}}>Other productivity use cases you've tried?</label>
+              <input value={ans.productivityOther} onChange={e=>set("productivityOther",e.target.value)} placeholder="Describe briefly…" style={S.inp}/>
+            </div>
+          </div>
+        )}
+        {!done&&step===6&&(
+          <div>
+            <StepHeader step={6}/>
+            <h2 style={{fontSize:"22px",fontWeight:"700",color:"#f1f5f9",margin:"0 0 4px",fontFamily:"'Syne',sans-serif"}}>AI for client deliverables</h2>
+            <p style={{color:"#64748b",fontSize:"13px",margin:"0 0 16px"}}>Which have you proposed, piloted, or delivered to clients?</p>
+            <div style={{display:"flex",flexDirection:"column",gap:"5px"}}>
+              {CLIENT_USECASES.map(item=>(
+                <div key={item.id}>
+                  <CheckItem item={item} state={ans.clientUsecases[item.id]||0} onToggle={(id,val)=>setUsecase("clientUsecases",id,val)} color="#22d3ee"/>
+                  {item.tools&&ans.clientUsecases[item.id]===2&&(
+                    <div style={{marginTop:"4px",marginBottom:"2px",paddingLeft:"25px",fontSize:"11px",color:"#475569"}}>
+                      🛠 Key tools to get started: <span style={{color:"#22d3ee",fontWeight:"600"}}>{item.tools[0]}</span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+            <div style={{marginTop:"12px"}}>
+              <label style={{...S.lbl,display:"block",marginBottom:"5px"}}>Other AI-powered deliverables you've explored with clients?</label>
+              <input value={ans.clientOther} onChange={e=>set("clientOther",e.target.value)} placeholder="Describe briefly…" style={S.inp}/>
+            </div>
+          </div>
+        )}
         {!done&&step===7&&(
           <div>
             <StepHeader step={7}/>
